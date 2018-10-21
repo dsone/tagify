@@ -63,7 +63,8 @@ Tagify.prototype = {
             classname : '',
             enabled   : 2,    // minimum input characters needs to be typed for the dropdown to show
             maxItems  : 10,
-            itemTemplate : ''
+            itemTemplate : '',
+            fuzzyMatch: false
         }
     },
 
@@ -442,10 +443,14 @@ Tagify.prototype = {
          */
         autocomplete : {
             suggest( s ){
-                if( !s || !this.input.value )
+                if (!s || !this.input.value) {
                     this.DOM.input.removeAttribute("data-suggest");
-                else
-                    this.DOM.input.setAttribute("data-suggest", s.substring(this.input.value.length));
+                } else {
+                    this.DOM.input.setAttribute(
+                        "data-suggest",
+                        (!this.settings.dropdown.fuzzyMatch ? s.substring(this.input.value.length) : s.substr(s.indexOf(this.input.value)+this.input.value.length))
+                    );
+                }
             },
             set( s ){
                 var dataSuggest = this.DOM.input.getAttribute('data-suggest'),
@@ -1043,8 +1048,18 @@ Tagify.prototype = {
                 i = 0;
 
             for( ; i < whitelist.length; i++ ){
-                whitelistItem = whitelist[i] instanceof Object ? whitelist[i] : { value:whitelist[i] }, //normalize value as an Object
-                valueIsInWhitelist = whitelistItem.value.toLowerCase().replace(/\s/g, '').indexOf(value.toLowerCase().replace(/\s/g, '')) == 0; // for fuzzy-search use ">="
+                whitelistItem = whitelist[i] instanceof Object ? whitelist[i] : { value: whitelist[i] }; //normalize value as an Object
+
+                valueIsInWhitelist = undefined;
+                if (!this.settings.dropdown.fuzzyMatch) {
+                    valueIsInWhitelist = whitelistItem.value.toLowerCase().replace(/\s/g, '').indexOf(value.toLowerCase().replace(/\s/g, '')) == 0;// for fuzzy-search use ">="
+                } else {
+                    try {
+                        valueIsInWhitelist = (new RegExp(value.replace(/\s/g, ''), 'i')).test(whitelistItem.value.replace(/\s/g, ''));
+                    } catch (e) {
+                        valueIsInWhitelist = false;
+                    }
+                }
 
                 // match for the value within each "whitelist" item
                 if( valueIsInWhitelist && this.isTagDuplicate(whitelistItem.value) == -1 && suggestionsCount-- )
