@@ -136,10 +136,11 @@ Matching suggested values is case-insensetive.
 The selectbox dropdown will be appended to the document's "body" element and will be positioned under the element.
 Using the keyboard arrows up/down will highlight an option from the list, and hitting the Enter key to select.
 
-It is possible to tweak the selectbox dropdown via 2 settings:
+It is possible to tweak the selectbox dropdown via 3 settings:
 
  - enabled - this is a numeral value which tells Tagify when to show the suggestions dropdown, when a minimum of N characters were typed.
  - maxItems - Limits the number of items the suggestions selectbox will render
+ - fuzzyMatch - Boolean, enables partial matches against the whitelist, default is `false`
 
 ```javascript
 var input = document.querySelector('input'),
