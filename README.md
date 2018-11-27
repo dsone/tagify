@@ -95,6 +95,13 @@ tagify.addTags(["banana", "orange", "apple"])
 tagify.addTags([{value:"banana", color:"yellow"}, {value:"apple", color:"red"}, {value:"watermelon", color:"green"}])
 ```
 
+### output value
+
+There are two possible ways to get the value of the tags:
+
+1. Access the tagify's instance's `value` prop: `tagify.value` (Array of tags)
+2. Access the original input's value: `inputElm.value` (Stringified Array of tags)
+
 ### Ajax whitelist
 
 It's possible to load a dynamic suggestions list (*whitelist*) from the server, as the user types.
@@ -123,7 +130,7 @@ function onInput( e ){
     .then(function(whitelist){
       tagify.settings.whitelist = whitelist;
       tagify.dropdown.show.call(tagify, value); // render the suggestions dropdown
-    }
+    })
 }
 
 ```
@@ -228,6 +235,62 @@ class App extends React.Component {
 ReactDOM.render(<App />, document.getElementById('app'))
 ```
 
+[Live React Demo in Codepen](https://codepen.io/vsync/project/editor/44cc53af79bbede42efd7521d94d6f9f)
+
+### Angular
+
+**TagifyComponent** which will be used by your template as `<tagify>`
+
+Example:
+
+```
+<div>
+  testing tagify wrapper
+  <tagify [settings]="settings"
+          (add)="onAdd($event)"
+          (remove)="onRemove($event)">
+  </tagify>
+  <button (click)="clearTags()">clear</button>
+  <button (click)="addTags()">add Tags</button>
+</div>
+```
+
+**TagifyService**
+
+(The tagifyService is a singletone injected by angular, do not create a new instance of it)
+
+```typescript
+import {Component, OnDestroy} from '@angular/core';
+import {TagifyService} from 'ngTagify';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
+export class AppComponent implements OnDestroy {
+
+  constructor(private tagifyService: TagifyService) {}
+  public settings = { blacklist: ['fucking', 'shit']};
+
+  onAdd(tagify) {
+    console.log('added a tag', tagify);
+  }
+
+  onRemove(tags) {
+    console.log('removed a tag', tags);
+  }
+  clearTags() {
+    this.tagifyService.removeAll();
+  }
+  addTags() {
+    this.tagifyService.addTags(['this', 'is', 'cool']);
+  }
+  ngOnDestroy() {
+    this.tagifyService.destroy();
+  }
+}
+```
 
 ### jQuery version 
 
@@ -285,6 +348,7 @@ callbacks             | Object     | {}          | Exposed callbacks object to b
 maxTags               | Number     | Infinity    | Maximum number of tags
 transformTag          | Function   | undefined   | Takes a tag input as argument and returns a transformed value
 tagTemplate           | Function   | undefined   | Takes a tag's value and data as arguments and returns an HTML string for a tag element
+keepInvalidTags       | Boolean    | false       | If true, do not remove tags which did not pass validation
 dropdown.enabled      | Number     | 2           | Minimum characters to input to show the suggestions list. "false" to disable
 dropdown.maxItems     | Number     | 10          | Maximum items to show in the suggestions list dropdown
 dropdown.classname    | String     | ""          | Custom class name for the dropdown suggestions selectbox
