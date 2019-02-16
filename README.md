@@ -13,10 +13,10 @@
 ```
 -->
 <p align="center">
-<img src="https://raw.githubusercontent.com/yairEO/tagify/master/mix2.gif" />
+    <img src="https://raw.githubusercontent.com/yairEO/tagify/master/mix2.gif" />
 </p>
 <p align="center">
-<img src="https://raw.githubusercontent.com/yairEO/tagify/master/demo.gif" />
+    <img src="https://raw.githubusercontent.com/yairEO/tagify/master/demo.gif" />
 </p>
 
 Transforms an input field or a textarea into a *Tags* component, in an easy, customizable way,
@@ -34,7 +34,9 @@ with great performance and tiny code footprint.
    * [Adding tags dynamically](#adding-tags-dynamically)
    * [Ajax whitelist](#ajax-whitelist)
    * [Suggestions selectbox](#suggestions-selectbox)
+   * [Edit tags](#edit-tags)
    * [React wrapper](#react)
+   * [Angular wrapper](#angular)
    * [jQuery version](#jquery-version)
    * [Methods](#methods)
    * [Events](#events)
@@ -51,13 +53,13 @@ with great performance and tiny code footprint.
     var tagify = new Tagify(...)
 
 ## Selling points
-* JS minified `~16kb` (`~4kb` GZIP) 
-* SCSS file is `~6kb` of well-crafted flexible code
+* JS minified `~17kb` (`~6kb` GZIP)
+* CSS minified `~5kb` (`~2kb` GZIP) - well-crafted flexible code
 * Easily change direction to RTL via the SCSS file only
 * No other inputs are used beside the original, and its value is kept in sync
 * Easily customized
 * Exposed custom events (add, remove, invalid)
-* For Internet Explorer 11 include the script `tagify.polyfills.js` under `/dist`
+* Internet Explorer - A polyfill script can be used: `tagify.polyfills.min.js` in `/dist`
 
 ## What can Tagify do
 * Can be applied on input & textarea elements
@@ -69,6 +71,7 @@ with great performance and tiny code footprint.
 * Can paste in multiple values: `tag 1, tag 2, tag 3`
 * Tags can be created by Regex delimiter or by pressing the "Enter" key / focusing of the input
 * Validate tags by Regex pattern
+* Tags are [editable](#edit-tags)
 * Supports read-only mode to the whole componenet or per-tag
 * Each tag can have any properties desired (class, data-whatever, readonly...)
 * Automatically disallow duplicate tags (vis "settings" object)
@@ -104,15 +107,14 @@ There are two possible ways to get the value of the tags:
 
 ### Ajax whitelist
 
-It's possible to load a dynamic suggestions list (*whitelist*) from the server, as the user types.
+Dynamically-loaded suggestions list (*whitelist*) from the server (as the user types) is a frequent need to many.
 
-Below is just an rough example using the `fetch` API. I advise in real-life scenario to abort the last request 
-on any input 
+Below is a basic example using the `fetch` API. I advise to abort the last request on any input before starting a new request.
 
 ```javascript
 var input = document.querySelector('input'),
     tagify = new Tagify(input, {whitelist:[]}),
-    controller; // for aborting the call 
+    controller; // for aborting the call
 
 // listen to any keystrokes which modify tagify's input
 tagify.on('input', onInput)
@@ -123,7 +125,7 @@ function onInput( e ){
 
   // https://developer.mozilla.org/en-US/docs/Web/API/AbortController/abort
   controller && controller.abort();
-  controller = new AbortController(); 
+  controller = new AbortController();
 
   fetch('http://get_suggestions.com?value=' + value, {signal:controller.signal})
     .then(RES => RES.json())
@@ -173,7 +175,13 @@ Will render:
 </div>
 ```
 
-### React 
+### Edit tags
+Tags which aren't `read-only` can be edited by double-clicking them.
+
+The value is saved on `blur` or by pressnig `enter` key. Pressing `Escaspe` will revert the change trigger `blur`.
+<kbd>ctrl</kbd><kbd>z</kbd> will revert the change if an edited tag was marked as not valid (perhaps duplicate or blacklisted)
+
+### React
 
 `react.tagify.js`
 
@@ -202,7 +210,7 @@ class App extends React.Component {
 
     componentDidMount(){}
 
-    // callbacks for all of Tagify's events: 
+    // callbacks for all of Tagify's events:
     onTagifyAdd = e => {
         console.log('added:', e.detail);
     }
@@ -223,10 +231,10 @@ class App extends React.Component {
     render(){
         return (
             <Tags mode='textarea'
-                  autofocus={true} 
-                  className='myInput' 
-                  name='tags' 
-                  settings={tagifySettings} 
+                  autofocus={true}
+                  className='myInput'
+                  name='tags'
+                  settings={tagifySettings}
                   initialValue='foo, bar, baz' />
         )
     }
@@ -292,7 +300,7 @@ export class AppComponent implements OnDestroy {
 }
 ```
 
-### jQuery version 
+### jQuery version
 
 `jQuery.tagify.js`
 
@@ -307,6 +315,13 @@ $('[name=tags]')
     });
 ```
 
+Accessing methods can be done via the [`.data('tagify')`](https://api.jquery.com/data):
+
+```javascript
+$('[name=tags]').tagify();
+// get tags from the server (ajax) and add them:
+$('[name=tags]').data('tagify').addTag('aaa, bbb, ccc')
+````
 
 ## Methods
 
@@ -317,7 +332,7 @@ removeAllTags       | Removes all tags and resets the original input tag's value
 addTags             | Accepts a String (word, single or multiple with a delimiter), an Array of Objects (see above) or Strings
 removeTag           | Removes a specific tag (argument is the tag DOM element to be removed. see source code.)
 loadOriginalValues  | Converts the input's value into tags. This method gets called automatically when instansiating Tagify
-getTagIndexByValue  | 
+getTagIndexByValue  |
 getTagElmByValue    |
 
 
@@ -328,7 +343,9 @@ Name            | Info
 add             | A tag has been added
 remove          | A tag has been removed
 invalid         | A tag has been added but did not pass vaildation. See [event detail](https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Creating_and_triggering_events)
-input           | On [Input](https://developer.mozilla.org/en-US/docs/Web/Events/input) event 
+input           | [Input](https://developer.mozilla.org/en-US/docs/Web/Events/input) event, when a tag is being typed/edited. `e.detail` exposes the typed value
+click           | Clicking a tag. Exposes the tag element, its index & data
+edit            | A tag has been edited
 
 
 ## Settings
@@ -345,10 +362,11 @@ whitelist             | Array      | []          | An array of tags which only t
 blacklist             | Array      | []          | An array of tags which aren't allowed
 addTagOnBlur          | Boolean    | true        | Automatically adds the text which was inputed as a tag when blur event happens
 callbacks             | Object     | {}          | Exposed callbacks object to be triggered on events: 'add' / 'remove' tags
-maxTags               | Number     | Infinity    | Maximum number of tags
+maxTags               | Number     | Infinity    | Maximum number of allowed tags. when reached, adds a class "hasMaxTags" to `<Tags>`
 transformTag          | Function   | undefined   | Takes a tag input as argument and returns a transformed value
 tagTemplate           | Function   | undefined   | Takes a tag's value and data as arguments and returns an HTML string for a tag element
 keepInvalidTags       | Boolean    | false       | If true, do not remove tags which did not pass validation
+backspace             | *          | true        | On backspace: (true) - remove last tag, ("edit") - edit last tag
 dropdown.enabled      | Number     | 2           | Minimum characters to input to show the suggestions list. "false" to disable
 dropdown.maxItems     | Number     | 10          | Maximum items to show in the suggestions list dropdown
 dropdown.classname    | String     | ""          | Custom class name for the dropdown suggestions selectbox

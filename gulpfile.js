@@ -126,6 +126,9 @@ gulp.task('build_js', ['lint_js'], () => {
     return jsStream
         .pipe( $.babel({presets: ['env']}) )
         .pipe( $.umd() )
+        .pipe( gulp.dest('./dist/') )
+        .pipe($.rename('tagify.min.js'))
+        .pipe($.uglify())
         .pipe( $.insert.prepend(banner) )
         .pipe( gulp.dest('./dist/') )
 });
@@ -134,24 +137,32 @@ gulp.task('build_js', ['lint_js'], () => {
 
 gulp.task('build_jquery_version', () => {
     return gulp.src('src/tagify.js')
-        .pipe($.insert.wrap(banner + jQueryPluginWrap[0], jQueryPluginWrap[1]))
+        .pipe($.insert.wrap(jQueryPluginWrap[0], jQueryPluginWrap[1]))
         .pipe( $.babel({presets: ['env']}) )
-        .pipe($.rename('jQuery.tagify.js'))
+        .pipe($.rename('jQuery.tagify.min.js'))
+        .pipe($.uglify())
+        .pipe($.insert.prepend(banner))
         .pipe(gulp.dest('./dist/'))
 });
 
 
 gulp.task('minify', () => {
-    gulp.src('dist/tagify.js')
-        .pipe($.uglify())
-        .on('error', handleError)
-        .pipe($.rename('tagify.min.js'))
-        .pipe(gulp.dest('./dist/'))
+    // gulp.src('dist/tagify.js')
+    //     .pipe($.uglify())
+    //     .on('error', handleError)
+    //     .pipe($.rename('tagify.min.js'))
+    //     .pipe(gulp.dest('./dist/'))
 
-    return gulp.src('dist/jQuery.tagify.js')
+    // gulp.src('dist/jQuery.tagify.js')
+    //     .pipe($.uglify())
+    //     .on('error', handleError)
+    //     .pipe($.rename('jQuery.tagify.min.js'))
+    //     .pipe(gulp.dest('./dist/'))
+
+    gulp.src('src/tagify.polyfills.js')
         .pipe($.uglify())
         .on('error', handleError)
-        .pipe($.rename('jQuery.tagify.min.js'))
+        .pipe($.rename('tagify.polyfills.min.js'))
         .pipe(gulp.dest('./dist/'))
 });
 

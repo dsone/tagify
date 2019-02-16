@@ -2,7 +2,7 @@
     $self: &;
     $tags-border-color       : #DDD;
     $tags-hover-border-color : #CCC;
-    $tags-focus-border-color : #CCC;
+    $tags-focus-border-color : #85C8EA;
 
     $tagMargin           : 5px;
     $tagPad              : .3em .5em;
@@ -23,6 +23,12 @@
         }
     }
 
+    @mixin tagReadonlyBG{
+        $draken-color : darken($tag-bg, 6);
+        background: linear-gradient(45deg, $draken-color 25%, transparent 25%, transparent 50%, $draken-color 50%, $draken-color 75%, transparent 75%, transparent) 0/5px 5px;
+        box-shadow: none;
+    }
+
     @keyframes tags--bump{
         30% { transform: scale(1.2); }
     }
@@ -33,8 +39,10 @@
     padding       : 0;
     cursor        : text;
     position      : relative;
+    transition    : .1s;
 
     &:hover{ border-color:$tags-hover-border-color; }
+    &.tagify--focus{ border-color: $tags-focus-border-color; }
 
     // Global "read-only" mode (no input button)
     &[readonly]{
@@ -45,7 +53,11 @@
             margin: $tagMargin 0;
         }
         x{ display:none; }
-        tag > div{ padding: $tagPad; }
+        tag > div{ padding: $tagPad;
+            &::before{
+                @include tagReadonlyBG;
+            }
+        }
     }
 
     ///////////////////////////////////////////
@@ -62,6 +74,22 @@
         cursor         : default;
         transition     : .13s ease-out;
 
+        &.tagify--editable{
+            > div{
+                &::before{
+                    box-shadow: 0 0 0 2px $tag-hover inset !important;
+                }
+            }
+
+            &.tagify--invalid{
+                > div{
+                    &::before{
+                        box-shadow: 0 0 0 2px $invalid-input-color inset !important;
+                    }
+                }
+            }
+        }
+
         > div{  // :not([contenteditable])
             vertical-align : top;
             position       : relative;
@@ -70,6 +98,7 @@
             padding        : $tagPad;
             color          : $tag-text-color;
             border-radius  : 3px;
+            user-select    : none;
             transition     : .13s ease-out;
 
             > *{
@@ -78,8 +107,12 @@
                 text-overflow  : ellipsis;
                 display        : inline-block;
                 vertical-align : top;
+
+                &[contenteditable]{
+                    outline: none;
+                }
               //  width          : 100%;
-                transition     : .1s;
+         //       transition     : .1s;
             }
 
             @if $showX {
@@ -91,10 +124,10 @@
                 position: absolute;
                 border-radius: inherit;
                 left:0; top:0; right:0; bottom:0;
-                background: $tag-bg;
+                box-shadow: 0 0 0 16px $tag-bg inset;
                 z-index: -1;
                 pointer-events:none;
-                transition: 80ms ease;
+                transition: 120ms ease;
                 animation : .3s tags--bump 1 ease-out;
             }
         }
@@ -105,8 +138,8 @@
                     $size: -$tagMargin/2;
                     $size: -2px;
                     top:$size; right:$size; bottom:$size; left:$size;
-                    background: $tag-hover;
-                    box-shadow: 0 0 0 0 $tag-remove inset
+                    box-shadow: 0 0 0 16px $tag-hover inset;
+                  //  box-shadow: 0 0 0 0 $tag-remove inset
                 }
                 // background:nth($tagColor,2);
                 //background:none;
@@ -138,7 +171,7 @@
                 div{
                     > span{ opacity:.5; } // filter:blur(.2px);
                     &::before{
-                        background: rgba($tag-remove, .44);
+                        box-shadow: 0 0 0 20px rgba($tag-remove, .44) inset !important;
                         transition: .2s;
                     }
                 }
@@ -147,7 +180,11 @@
 
         &[readonly]{
             x{ display:none; }
-            > div{ padding: $tagPad; }
+            > div{ padding: $tagPad;
+                &::before{
+                    @include tagReadonlyBG;
+                }
+            }
         }
 
         ///////////////////////////////////////////
@@ -178,7 +215,10 @@
                 // + span{ box-shadow: 0 0 0 2px $tag-remove inset; transition:.2s; }
                 + div{
                     > span{ opacity:.5; } // filter:blur(.2px);
-                    &::before{ background:rgba($tag-remove, .44); transition:.2s; }
+                    &::before{
+                        box-shadow: 0 0 0 20px rgba($tag-remove, .3) inset !important;
+                        transition:.2s;
+                    }
                 }
             }
         }
